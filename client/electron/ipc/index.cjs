@@ -1,6 +1,7 @@
 const { ipcMain, shell } = require('electron');
 const { registerAgentIpc } = require('./agentIpc.cjs');
 const { registerAiIpc } = require('./aiIpc.cjs');
+const { registerBusinessBidIpc } = require('./businessBidIpc.cjs');
 const { registerConfigIpc } = require('./configIpc.cjs');
 const { registerDeveloperIpc } = require('./developerIpc.cjs');
 const { registerDuplicateCheckIpc } = require('./duplicateCheckIpc.cjs');
@@ -15,6 +16,7 @@ const { registerTemplateIpc } = require('./templateIpc.cjs');
 const { registerSystemFontIpc } = require('./systemFontIpc.cjs');
 const { createAgentService } = require('../services/agentService.cjs');
 const { createAiService } = require('../services/aiService.cjs');
+const { createBusinessBidStore } = require('../services/businessBidStore.cjs');
 const { createConfigStore } = require('../services/configStore.cjs');
 const { createDuplicateCheckService } = require('../services/duplicateCheckService.cjs');
 const { createDuplicateCheckStore } = require('../services/duplicateCheckStore.cjs');
@@ -78,6 +80,9 @@ const workspaceDatabaseChannels = [
   'duplicate-check:save-ui-state',
   'duplicate-check:update-state',
   'duplicate-check:clear',
+  'business-bid:load-state',
+  'business-bid:save-state',
+  'business-bid:clear',
   'rejection-check:load-state',
   'rejection-check:import-document',
   'rejection-check:import-tender-from-technical-plan',
@@ -175,6 +180,7 @@ function registerWorkspaceDatabaseServices({ app, configStore, aiService, agentS
   const knowledgeBaseStore = createKnowledgeBaseStore({ app, db: sqliteDatabase.db });
   const knowledgeBaseService = createKnowledgeBaseService({ app, aiService, configStore, knowledgeBaseStore });
   const technicalPlanStore = createTechnicalPlanStore({ app, db: sqliteDatabase.db, fileService });
+  const businessBidStore = createBusinessBidStore({ db: sqliteDatabase.db });
   const duplicateCheckStore = createDuplicateCheckStore({ app, db: sqliteDatabase.db });
   const rejectionCheckStore = createRejectionCheckStore({ app, db: sqliteDatabase.db, fileService, technicalPlanStore });
   const templateStore = createTemplateStore({ db: sqliteDatabase.db });
@@ -184,6 +190,7 @@ function registerWorkspaceDatabaseServices({ app, configStore, aiService, agentS
   clearWorkspaceDatabaseIpc();
   registerKnowledgeBaseIpc({ knowledgeBaseService });
   registerTechnicalPlanIpc({ technicalPlanStore });
+  registerBusinessBidIpc({ businessBidStore });
   registerDuplicateCheckIpc({ duplicateCheckStore });
   registerRejectionCheckIpc({ rejectionCheckStore });
   registerTemplateIpc({ templateStore });

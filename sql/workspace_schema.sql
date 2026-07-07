@@ -4,7 +4,7 @@
 -- 1. 本文件用于开源开发者阅读、评审和排查问题，展示 workspace/yibiao.sqlite 的目标完整表结构。
 -- 2. 用户运行客户端时不需要手动执行本文件。
 -- 3. 客户端运行时建表和升级以 Electron Main 侧 migration 代码为准。
--- 4. 当前运行代码已落地 technical_plan_* v1、duplicate_check_* / rejection_check_* v2、knowledge_* v3、technical_plan_global_fact_groups v4、标段兼容 v5/v6、标段选择 v7、旧待选择标段兼容字段 v8、工作流类型和原方案文件状态 v9、招标解析项选择配置 v10、知识库排序 v11、废标项检查多投标文件 v12、已有方案目录配置 v13、多标段优化状态 v14、导出模板库 v15 目标结构。
+-- 4. 当前运行代码已落地 technical_plan_* v1、duplicate_check_* / rejection_check_* v2、knowledge_* v3、technical_plan_global_fact_groups v4、标段兼容 v5/v6、标段选择 v7、旧待选择标段兼容字段 v8、工作流类型和原方案文件状态 v9、招标解析项选择配置 v10、知识库排序 v11、废标项检查多投标文件 v12、已有方案目录配置 v13、多标段优化状态 v14、导出模板库 v15、商务标本地工作台 v16 目标结构。
 -- 5. 每次表结构调整后，需要同步更新本文件和 runtime migration 版本。
 -- 6. 本文件不保存历史版本，每次更新都写入最新目标完整结构。
 
@@ -14,7 +14,7 @@ PRAGMA busy_timeout = 5000;
 
 -- 目标完整结构版本。
 -- 运行时代码应通过 PRAGMA user_version 判断是否需要自动升级。
-PRAGMA user_version = 15;
+PRAGMA user_version = 16;
 
 -- ============================================================================
 -- 技术方案 technical_plan_*（v1 已落地）
@@ -767,3 +767,48 @@ CREATE TABLE IF NOT EXISTS export_templates (
 
 CREATE INDEX IF NOT EXISTS idx_export_templates_updated
 ON export_templates(updated_at DESC);
+
+-- ============================================================================
+-- 商务标 business_bid_*（v16 目标设计）
+-- ============================================================================
+
+-- 商务标项目基础信息单例
+CREATE TABLE IF NOT EXISTS business_bid_meta (
+  id INTEGER PRIMARY KEY CHECK (id = 1),
+  project_name TEXT NOT NULL DEFAULT '',
+  bidder_name TEXT NOT NULL DEFAULT '',
+  bid_amount TEXT NOT NULL DEFAULT '',
+  validity_days TEXT NOT NULL DEFAULT '',
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL
+);
+
+-- 商务条款响应清单
+CREATE TABLE IF NOT EXISTS business_bid_clauses (
+  clause_id TEXT PRIMARY KEY,
+  clause TEXT NOT NULL,
+  requirement TEXT NOT NULL DEFAULT '',
+  response TEXT NOT NULL DEFAULT '',
+  owner TEXT NOT NULL DEFAULT '',
+  status TEXT NOT NULL DEFAULT 'pending',
+  sort_order INTEGER NOT NULL DEFAULT 0,
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_business_bid_clauses_order
+ON business_bid_clauses(sort_order, created_at);
+
+-- 商务附件清单
+CREATE TABLE IF NOT EXISTS business_bid_attachments (
+  attachment_id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  type TEXT NOT NULL DEFAULT '',
+  status TEXT NOT NULL DEFAULT 'missing',
+  sort_order INTEGER NOT NULL DEFAULT 0,
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_business_bid_attachments_order
+ON business_bid_attachments(sort_order, created_at);

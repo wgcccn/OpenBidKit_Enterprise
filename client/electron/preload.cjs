@@ -132,6 +132,11 @@ const bridge = {
     updateState: (partial) => ipcRenderer.invoke('duplicate-check:update-state', partial),
     clear: () => ipcRenderer.invoke('duplicate-check:clear'),
   },
+  businessBid: {
+    loadState: () => ipcRenderer.invoke('business-bid:load-state'),
+    saveState: (state) => ipcRenderer.invoke('business-bid:save-state', state),
+    clear: () => ipcRenderer.invoke('business-bid:clear'),
+  },
   rejectionCheck: {
     loadState: () => ipcRenderer.invoke('rejection-check:load-state'),
     importDocument: (role) => ipcRenderer.invoke('rejection-check:import-document', role),

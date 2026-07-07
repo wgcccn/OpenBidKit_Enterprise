@@ -3,7 +3,7 @@ const path = require('node:path');
 const Database = require('better-sqlite3');
 const { getWorkspaceDatabasePath } = require('../utils/paths.cjs');
 
-const schemaVersion = 15;
+const schemaVersion = 16;
 
 function createInitialSchema(db) {
   db.exec(`
@@ -871,6 +871,48 @@ function createExportTemplatesSchema(db) {
   `);
 }
 
+function createBusinessBidSchema(db) {
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS business_bid_meta (
+      id INTEGER PRIMARY KEY CHECK (id = 1),
+      project_name TEXT NOT NULL DEFAULT '',
+      bidder_name TEXT NOT NULL DEFAULT '',
+      bid_amount TEXT NOT NULL DEFAULT '',
+      validity_days TEXT NOT NULL DEFAULT '',
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS business_bid_clauses (
+      clause_id TEXT PRIMARY KEY,
+      clause TEXT NOT NULL,
+      requirement TEXT NOT NULL DEFAULT '',
+      response TEXT NOT NULL DEFAULT '',
+      owner TEXT NOT NULL DEFAULT '',
+      status TEXT NOT NULL DEFAULT 'pending',
+      sort_order INTEGER NOT NULL DEFAULT 0,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_business_bid_clauses_order
+    ON business_bid_clauses(sort_order, created_at);
+
+    CREATE TABLE IF NOT EXISTS business_bid_attachments (
+      attachment_id TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
+      type TEXT NOT NULL DEFAULT '',
+      status TEXT NOT NULL DEFAULT 'missing',
+      sort_order INTEGER NOT NULL DEFAULT 0,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_business_bid_attachments_order
+    ON business_bid_attachments(sort_order, created_at);
+  `);
+}
+
 const schemaHealthTableGroups = [
   {
     version: 1,
@@ -945,6 +987,11 @@ const schemaHealthTableGroups = [
     version: 15,
     tables: ['export_templates'],
     repair: createExportTemplatesSchema,
+  },
+  {
+    version: 16,
+    tables: ['business_bid_meta', 'business_bid_clauses', 'business_bid_attachments'],
+    repair: createBusinessBidSchema,
   },
 ];
 
@@ -1209,6 +1256,11 @@ const migrations = [
     version: 15,
     description: '新增导出模板库表结构',
     up: createExportTemplatesSchema,
+  },
+  {
+    version: 16,
+    description: '新增商务标本地工作台表结构',
+    up: createBusinessBidSchema,
   },
 ];
 

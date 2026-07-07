@@ -1,6 +1,7 @@
 import type { AiHttpErrorPayload, ChatCompletionRequest, JsonCompletionRequest } from './ai';
 import type { DuplicateCheckWorkspaceState, FileSelectionResult } from './bid';
 import type { ClientConfig, ConfigSaveResult, ImageModelTestResult, ModelListResult, UpdateChannel } from './config';
+import type { BusinessBidWorkspaceState } from '../../features/business-bid/types';
 import type { KnowledgeAnalysisSnapshot, KnowledgeBaseEvent, KnowledgeBaseIndex, KnowledgeBaseIndexMutationResult, KnowledgeBaseMigrationResult, KnowledgeBaseMigrationStatus, KnowledgeBaseMutationResult, KnowledgeBaseRetryDocumentResult, KnowledgeBaseStartMatchingResult, KnowledgeBaseUploadResult, KnowledgeDocument, KnowledgeFolder, KnowledgeItem } from '../../features/knowledge-base/types';
 import type { RejectionCheckWorkspaceState, RejectionDocumentRole } from '../../features/rejection-check/types';
 import type { BidAnalysisMode, BidAnalysisTaskState, BidSectionMode, ContentGenerationOptions, ContentGenerationPlanState, ContentGenerationRuntimeState, ContentGenerationSectionState, DetectedBidSection, GlobalFactGroupState, SaveOutlineRequest, TechnicalPlanState, TechnicalPlanStep, TechnicalPlanWorkflowKind } from '../../features/technical-plan/types';
@@ -421,6 +422,11 @@ export interface YibiaoBridge {
     saveUiState: (payload: Partial<Pick<DuplicateCheckWorkspaceState, 'step' | 'activeAnalysisTab'>>) => Promise<DuplicateCheckWorkspaceState>;
     updateState: (partial: Partial<DuplicateCheckWorkspaceState>) => Promise<DuplicateCheckWorkspaceState>;
     clear: () => Promise<{ success: boolean; message?: string; state: DuplicateCheckWorkspaceState }>;
+  };
+  businessBid: {
+    loadState: () => Promise<BusinessBidWorkspaceState>;
+    saveState: (state: BusinessBidWorkspaceState) => Promise<BusinessBidWorkspaceState>;
+    clear: () => Promise<{ success: boolean; message?: string; state: BusinessBidWorkspaceState }>;
   };
   rejectionCheck: {
     loadState: () => Promise<RejectionCheckWorkspaceState>;
